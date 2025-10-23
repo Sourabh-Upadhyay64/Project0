@@ -1,15 +1,15 @@
-import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { CheckCircle2, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { useOrder } from '../hooks/useOrder';
-import { OrderStatusBanner } from '../components/OrderStatusBanner';
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { CheckCircle2, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useOrder } from "../hooks/useOrder";
+import { OrderStatusBanner } from "../components/OrderStatusBanner";
 
 export const OrderStatusPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const orderId = searchParams.get('orderId');
+  const orderId = searchParams.get("orderId");
   const { currentOrder, getOrderStatus } = useOrder();
 
   useEffect(() => {
@@ -23,18 +23,23 @@ export const OrderStatusPage = () => {
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center space-y-4">
           <h2 className="text-2xl font-bold">Order Not Found</h2>
-          <Button onClick={() => navigate('/customer/menu')}>Back to Menu</Button>
+          <Button onClick={() => navigate("/customer/menu")}>
+            Back to Menu
+          </Button>
         </div>
       </div>
     );
   }
 
-  const isOrderComplete = currentOrder.status === 'served';
+  const isOrderComplete = currentOrder.status === "delivered";
 
   return (
     <div className="min-h-screen bg-background">
       {/* Status Banner */}
-      <OrderStatusBanner status={currentOrder.status} orderId={currentOrder.id} />
+      <OrderStatusBanner
+        status={currentOrder.status}
+        orderId={currentOrder.id}
+      />
 
       {/* Content */}
       <div className="container mx-auto px-4 pt-24 pb-8 max-w-2xl">
@@ -45,10 +50,12 @@ export const OrderStatusPage = () => {
               <CheckCircle2 className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-3xl font-bold mb-2">Order Confirmed!</h1>
-            <p className="text-muted-foreground text-lg mb-1">Order #{currentOrder.id}</p>
-            <p className="text-sm text-muted-foreground">
-              We'll keep you updated on WhatsApp
+            <p className="text-muted-foreground text-lg mb-1">
+              Order #{currentOrder.id}
             </p>
+            {/* <p className="text-sm text-muted-foreground">
+              We'll keep you updated on WhatsApp
+            </p> */}
           </Card>
 
           {/* Order Summary */}
@@ -68,7 +75,9 @@ export const OrderStatusPage = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground">Order details will appear here</p>
+              <p className="text-muted-foreground">
+                Order details will appear here
+              </p>
             )}
           </Card>
 
@@ -92,7 +101,9 @@ export const OrderStatusPage = () => {
               )}
               <div className="flex justify-between text-lg font-bold pt-2 border-t">
                 <span>Total</span>
-                <span className="text-primary">${currentOrder.total.toFixed(2)}</span>
+                <span className="text-primary">
+                  ${currentOrder.total.toFixed(2)}
+                </span>
               </div>
             </div>
           </Card>
@@ -101,7 +112,9 @@ export const OrderStatusPage = () => {
           <div className="space-y-3">
             {isOrderComplete && (
               <Button
-                onClick={() => navigate(`/customer/feedback?orderId=${currentOrder.id}`)}
+                onClick={() =>
+                  navigate(`/customer/feedback?orderId=${currentOrder.id}`)
+                }
                 size="lg"
                 variant="outline"
                 className="w-full h-14 text-base"
@@ -111,7 +124,7 @@ export const OrderStatusPage = () => {
               </Button>
             )}
             <Button
-              onClick={() => navigate('/customer/menu')}
+              onClick={() => navigate("/customer/menu")}
               size="lg"
               className="w-full h-14 text-base"
             >

@@ -1,40 +1,40 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CreditCard, Tag, Users } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { useCart } from '../context/CartContext';
-import { useOrder } from '../hooks/useOrder';
-import { WhatsAppModal } from '../components/WhatsAppModal';
-import { toast } from 'sonner';
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft, CreditCard, Tag, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { useCart } from "../context/CartContext";
+import { useOrder } from "../hooks/useOrder";
+// import { WhatsAppModal } from '../components/WhatsAppModal'; // Disabled for now
+import { toast } from "sonner";
 
 export const CheckoutPage = () => {
   const navigate = useNavigate();
-  const { cart, getCartTotal, setWhatsAppNumber, setSplitBill, clearCart } = useCart();
+  const { cart, getCartTotal, setSplitBill, clearCart } = useCart();
   const { placeOrder, loading } = useOrder();
-  const [promoCode, setPromoCode] = useState('');
+  const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [splitEnabled, setSplitEnabled] = useState(false);
   const [splitCount, setSplitCount] = useState(2);
-  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
-  const [pendingOrder, setPendingOrder] = useState<any>(null);
+  // const [showWhatsAppModal, setShowWhatsAppModal] = useState(false); // Disabled for now
+  // const [pendingOrder, setPendingOrder] = useState<any>(null); // Disabled for now
 
   const subtotal = getCartTotal();
   const tax = subtotal * 0.09; // 9% tax
   const total = subtotal + tax - discount;
   const splitAmount = splitEnabled ? total / splitCount : total;
 
-  const tableNumber = localStorage.getItem('tableNumber') || undefined;
+  const tableNumber = localStorage.getItem("tableNumber") || undefined;
 
   const handleApplyPromo = () => {
     // Mock promo validation
     const promoCodes: Record<string, number> = {
-      'WELCOME10': 10,
-      'SAVE20': 20,
+      WELCOME10: 10,
+      SAVE20: 20,
     };
 
     const discountPercent = promoCodes[promoCode.toUpperCase()];
@@ -43,27 +43,39 @@ export const CheckoutPage = () => {
       setDiscount(discountAmount);
       toast.success(`${discountPercent}% discount applied!`);
     } else {
-      toast.error('Invalid promo code');
+      toast.error("Invalid promo code");
     }
   };
 
   const handlePlaceOrder = async () => {
-    const orderData = {
-      items: cart,
-      subtotal,
-      tax,
-      discount,
-      total,
-      tableNumber,
-      splitBill: splitEnabled,
-      splitCount: splitEnabled ? splitCount : undefined,
-      promoCode: promoCode || undefined,
-    };
+    try {
+      const orderData = {
+        items: cart,
+        subtotal,
+        tax,
+        discount,
+        total,
+        tableNumber,
+        splitBill: splitEnabled,
+        splitCount: splitEnabled ? splitCount : undefined,
+        promoCode: promoCode || undefined,
+        // WhatsApp feature disabled for now
+        // whatsappNumber: phoneNumber,
+      };
 
-    setPendingOrder(orderData);
-    setShowWhatsAppModal(true);
+      setSplitBill(splitEnabled, splitEnabled ? splitCount : undefined);
+      const order = await placeOrder(orderData);
+
+      clearCart();
+      toast.success("Order placed successfully!");
+      navigate(`/customer/order-status?orderId=${order.id}`);
+    } catch (error) {
+      console.error("Order placement failed:", error);
+      toast.error("Failed to place order. Please try again.");
+    }
   };
 
+  /* WhatsApp modal handler - Currently disabled
   const handleWhatsAppSubmit = async (phoneNumber: string) => {
     try {
       setWhatsAppNumber(phoneNumber);
@@ -80,9 +92,12 @@ export const CheckoutPage = () => {
       toast.success('Order placed successfully!');
       navigate(`/customer/order-status?orderId=${order.id}`);
     } catch (error) {
-      toast.error('Failed to place order');
+      console.error('Order placement failed:', error);
+      toast.error('Failed to place order. Please try again.');
+      setShowWhatsAppModal(false);
     }
   };
+  */
 
   if (cart.length === 0) {
     return (
@@ -90,7 +105,7 @@ export const CheckoutPage = () => {
         <div className="text-center space-y-4">
           <h2 className="text-2xl font-bold">Your cart is empty</h2>
           <p className="text-muted-foreground">Add some items to get started</p>
-          <Button onClick={() => navigate('/customer/menu')}>View Menu</Button>
+          <Button onClick={() => navigate("/customer/menu")}>View Menu</Button>
         </div>
       </div>
     );
@@ -104,7 +119,7 @@ export const CheckoutPage = () => {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate('/customer/menu')}
+            onClick={() => navigate("/customer/menu")}
             className="rounded-full"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -124,7 +139,9 @@ export const CheckoutPage = () => {
                   {item.quantity}x {item.name}
                   {item.variant && ` (${item.variant})`}
                 </span>
-                <span className="font-semibold">${(item.price * item.quantity).toFixed(2)}</span>
+                <span className="font-semibold">
+                  ${(item.price * item.quantity).toFixed(2)}
+                </span>
               </div>
             ))}
           </div>
@@ -143,12 +160,18 @@ export const CheckoutPage = () => {
               onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
               className="h-12"
             />
-            <Button onClick={handleApplyPromo} variant="outline" className="h-12">
+            <Button
+              onClick={handleApplyPromo}
+              variant="outline"
+              className="h-12"
+            >
               Apply
             </Button>
           </div>
           {discount > 0 && (
-            <p className="text-sm text-success mt-2">Discount applied: -${discount.toFixed(2)}</p>
+            <p className="text-sm text-success mt-2">
+              Discount applied: -${discount.toFixed(2)}
+            </p>
           )}
         </Card>
 
@@ -157,7 +180,10 @@ export const CheckoutPage = () => {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-primary" />
-              <Label htmlFor="split-bill" className="text-lg font-bold cursor-pointer">
+              <Label
+                htmlFor="split-bill"
+                className="text-lg font-bold cursor-pointer"
+              >
                 Split Bill
               </Label>
             </div>
@@ -235,16 +261,16 @@ export const CheckoutPage = () => {
           className="w-full h-14 text-base"
           disabled={loading}
         >
-          {loading ? 'Placing Order...' : 'Place Order'}
+          {loading ? "Placing Order..." : "Place Order"}
         </Button>
       </div>
 
-      {/* WhatsApp Modal */}
-      <WhatsAppModal
+      {/* WhatsApp Modal - Disabled for now */}
+      {/* <WhatsAppModal
         open={showWhatsAppModal}
         onOpenChange={setShowWhatsAppModal}
         onSubmit={handleWhatsAppSubmit}
-      />
+      /> */}
     </div>
   );
 };
