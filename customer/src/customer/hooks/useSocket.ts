@@ -1,8 +1,12 @@
-import { useEffect, useRef, useState } from 'react';
-import io, { Socket } from 'socket.io-client';
+import { useEffect, useRef, useState } from "react";
+import io, { Socket } from "socket.io-client";
 
 interface UseSocketOptions {
-  onOrderStatusUpdate?: (data: { orderId: string; status: string; orderNumber: string }) => void;
+  onOrderStatusUpdate?: (data: {
+    orderId: string;
+    status: string;
+    orderNumber: string;
+  }) => void;
 }
 
 export const useSocket = (options: UseSocketOptions = {}) => {
@@ -11,8 +15,9 @@ export const useSocket = (options: UseSocketOptions = {}) => {
 
   useEffect(() => {
     // Connect to socket server
-    socketRef.current = io('http://localhost:3000', {
-      transports: ['websocket'],
+    socketRef.current = io({
+      path: "/socket.io",
+      transports: ["websocket"],
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
@@ -21,23 +26,23 @@ export const useSocket = (options: UseSocketOptions = {}) => {
     const socket = socketRef.current;
 
     // Connection events
-    socket.on('connect', () => {
-      console.log('Connected to socket server');
+    socket.on("connect", () => {
+      console.log("Connected to socket server");
       setIsConnected(true);
     });
 
-    socket.on('disconnect', () => {
-      console.log('Disconnected from socket server');
+    socket.on("disconnect", () => {
+      console.log("Disconnected from socket server");
       setIsConnected(false);
     });
 
-    socket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error);
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
     });
 
     // Order status updates
-    socket.on('orderStatusUpdated', (data) => {
-      console.log('Order status updated:', data);
+    socket.on("orderStatusUpdated", (data) => {
+      console.log("Order status updated:", data);
       if (options.onOrderStatusUpdate) {
         options.onOrderStatusUpdate(data);
       }
@@ -47,7 +52,7 @@ export const useSocket = (options: UseSocketOptions = {}) => {
     return () => {
       socket.disconnect();
     };
-  }, [options.onOrderStatusUpdate]);
+  }, []);
 
   return { socket: socketRef.current, isConnected };
 };

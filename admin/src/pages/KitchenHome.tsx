@@ -1,31 +1,38 @@
-import { useEffect, useState } from 'react'
-import { useAuth } from '../context/AuthContext'
-import { LogOut, Bell, Clock, CheckCircle, Truck } from 'lucide-react'
-import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core'
-import OrderColumn from '../components/kitchen/OrderColumn'
-import { useSocket } from '../hooks/useSocket'
-import axios from 'axios'
-import { toast } from 'sonner'
+import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { LogOut, Bell, Clock, CheckCircle, Truck } from "lucide-react";
+import {
+  DndContext,
+  DragEndEvent,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import OrderColumn from "../components/kitchen/OrderColumn";
+import { useSocket } from "../hooks/useSocket";
+import axios from "axios";
+import { toast } from "sonner";
 
 export interface Order {
-  _id: string
-  orderNumber: string
-  tableNumber: number
+  _id: string;
+  orderNumber: string;
+  tableId: string;
+  tableNumber: number;
   items: Array<{
-    name: string
-    quantity: number
-    specialInstructions?: string
-  }>
-  status: 'preparing' | 'prepared' | 'delivered'
-  createdAt: string
-  totalAmount: number
+    name: string;
+    quantity: number;
+    specialInstructions?: string;
+  }>;
+  status: "preparing" | "prepared" | "delivered";
+  createdAt: string;
+  totalAmount: number;
 }
 
 const KitchenHome = () => {
-  const { logout, user } = useAuth()
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
-  const socket = useSocket()
+  const { logout, user } = useAuth();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const socket = useSocket();
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -33,86 +40,89 @@ const KitchenHome = () => {
         distance: 8,
       },
     })
-  )
+  );
 
   useEffect(() => {
-    fetchOrders()
+    fetchOrders();
 
     if (socket) {
-      socket.on('new-order', (order: Order) => {
-        setOrders((prev) => [...prev, order])
+      socket.on("new-order", (order: Order) => {
+        setOrders((prev) => [...prev, order]);
         toast.success(`New order #${order.orderNumber} received!`, {
           description: `Table ${order.tableNumber}`,
-        })
-        playNotificationSound()
-      })
+        });
+        playNotificationSound();
+      });
 
-      socket.on('order-updated', (updatedOrder: Order) => {
+      socket.on("order-updated", (updatedOrder: Order) => {
         setOrders((prev) =>
           prev.map((order) =>
             order._id === updatedOrder._id ? updatedOrder : order
           )
-        )
-      })
+        );
+      });
 
       return () => {
-        socket.off('new-order')
-        socket.off('order-updated')
-      }
+        socket.off("new-order");
+        socket.off("order-updated");
+      };
     }
-  }, [socket])
+  }, [socket]);
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get('/api/orders/active')
-      setOrders(response.data)
+      const response = await axios.get("/api/orders/active");
+      setOrders(response.data);
     } catch (error) {
-      toast.error('Failed to fetch orders')
+      toast.error("Failed to fetch orders");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const playNotificationSound = () => {
-    const audio = new Audio('/notification.mp3')
-    audio.play().catch(() => {})
-  }
+    const audio = new Audio("/notification.mp3");
+    audio.play().catch(() => {});
+  };
 
-  const updateOrderStatus = async (orderId: string, newStatus: Order['status']) => {
+  const updateOrderStatus = async (
+    orderId: string,
+    newStatus: Order["status"]
+  ) => {
     try {
-      await axios.put(`/api/orders/${orderId}/status`, { status: newStatus })
+      await axios.put(`/api/orders/${orderId}/status`, { status: newStatus });
       setOrders((prev) =>
         prev.map((order) =>
           order._id === orderId ? { ...order, status: newStatus } : order
         )
-      )
-      toast.success(`Order moved to ${newStatus}`)
+      );
+      toast.success(`Order moved to ${newStatus}`);
     } catch (error) {
-      toast.error('Failed to update order status')
+      toast.error("Failed to update order status");
     }
-  }
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event
+    const { active, over } = event;
 
-    if (!over || active.id === over.id) return
+    if (!over || active.id === over.id) return;
 
-    const orderId = active.id as string
-    const newStatus = over.id as Order['status']
+    const orderId = active.id as string;
+    const newStatus = over.id as Order["status"];
 
-    updateOrderStatus(orderId, newStatus)
-  }
+    updateOrderStatus(orderId, newStatus);
+  };
 
-  const preparingOrders = orders.filter((o) => o.status === 'preparing')
-  const preparedOrders = orders.filter((o) => o.status === 'prepared')
-  const deliveredOrders = orders.filter((o) => o.status === 'delivered')
+  const preparingOrders = orders.filter((o) => o.status === "preparing");
+  const preparedOrders = orders.filter((o) => o.status === "prepared");
+  const deliveredOrders = orders.filter((o) => o.status === "delivered");
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
       </div>
-    )
+    );
   }
 
   return (
@@ -124,7 +134,9 @@ const KitchenHome = () => {
             <h1 className="text-2xl font-bold">Kitchen Dashboard</h1>
             <div className="flex items-center space-x-2 bg-green-800 px-3 py-1 rounded-full">
               <Bell className="w-4 h-4" />
-              <span className="text-sm font-medium">{orders.length} Active Orders</span>
+              <span className="text-sm font-medium">
+                {orders.length} Active Orders
+              </span>
             </div>
           </div>
           <div className="flex items-center space-x-4">
@@ -172,7 +184,7 @@ const KitchenHome = () => {
         </DndContext>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default KitchenHome
+export default KitchenHome;

@@ -1,19 +1,33 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Utensils } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { ChevronRight, Utensils } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export const LandingPage = () => {
   const navigate = useNavigate();
-  const [tableNumber, setTableNumber] = useState('');
+  const [searchParams] = useSearchParams();
+  const [tableNumber, setTableNumber] = useState("");
+
+  useEffect(() => {
+    // Check if table parameter is in URL (from QR code scan)
+    const tableParam = searchParams.get("table");
+    if (tableParam) {
+      setTableNumber(tableParam);
+      localStorage.setItem("tableId", tableParam);
+      localStorage.setItem("tableNumber", tableParam);
+      // Auto-navigate to menu if table is from QR code
+      navigate("/customer/menu");
+    }
+  }, [searchParams, navigate]);
 
   const handleViewMenu = () => {
     if (tableNumber.trim()) {
-      localStorage.setItem('tableNumber', tableNumber);
+      localStorage.setItem("tableId", tableNumber);
+      localStorage.setItem("tableNumber", tableNumber);
     }
-    navigate('/customer/menu');
+    navigate("/customer/menu");
   };
 
   return (

@@ -1,44 +1,53 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
-const orderSchema = new mongoose.Schema({
-  orderNumber: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  tableNumber: {
-    type: Number,
-    required: true,
-  },
-  customerPhone: {
-    type: String,
-  },
-  items: [{
-    menuItemId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'MenuItem',
+const orderSchema = new mongoose.Schema(
+  {
+    orderNumber: {
+      type: String,
+      required: true,
+      unique: true,
     },
-    name: String,
-    quantity: Number,
-    price: Number,
-    specialInstructions: String,
-  }],
-  status: {
-    type: String,
-    enum: ['pending', 'preparing', 'prepared', 'delivered', 'cancelled'],
-    default: 'pending',
+    tableId: {
+      type: String,
+      required: true,
+    },
+    tableNumber: {
+      type: Number,
+      required: true,
+    },
+    customerPhone: {
+      type: String,
+    },
+    items: [
+      {
+        menuItemId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "MenuItem",
+        },
+        name: String,
+        quantity: Number,
+        price: Number,
+        specialInstructions: String,
+      },
+    ],
+    status: {
+      type: String,
+      enum: ["pending", "preparing", "prepared", "delivered", "cancelled"],
+      default: "pending",
+    },
+    totalAmount: {
+      type: Number,
+      required: true,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid"],
+      default: "pending",
+    },
   },
-  totalAmount: {
-    type: Number,
-    required: true,
-  },
-  paymentStatus: {
-    type: String,
-    enum: ['pending', 'paid'],
-    default: 'pending',
-  },
-}, {
-  timestamps: true,
-})
+  {
+    timestamps: true,
+  }
+);
 
-export default mongoose.model('Order', orderSchema)
+export default mongoose.model("Order", orderSchema);

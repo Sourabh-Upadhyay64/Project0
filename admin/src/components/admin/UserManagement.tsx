@@ -162,6 +162,41 @@ const UserManagement = () => {
         </button>
       </div>
 
+      {/* Default Credentials Info Banner */}
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-500 rounded-lg p-4 shadow-sm">
+        <div className="flex items-start space-x-3">
+          <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <h3 className="text-sm font-semibold text-blue-900 mb-2">
+              Default Kitchen Login Credentials
+            </h3>
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center space-x-4 bg-white rounded px-3 py-2 shadow-sm">
+                <div className="flex items-center space-x-2">
+                  <User className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-600">Username:</span>
+                  <code className="bg-blue-100 text-blue-800 px-2 py-1 rounded font-mono text-xs font-semibold">
+                    kitchen1
+                  </code>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Key className="w-4 h-4 text-gray-500" />
+                  <span className="text-gray-600">Password:</span>
+                  <code className="bg-blue-100 text-blue-800 px-2 py-1 rounded font-mono text-xs font-semibold">
+                    kitchen123
+                  </code>
+                </div>
+              </div>
+              <p className="text-blue-700 text-xs mt-2">
+                💡 <strong>Tip:</strong> You can edit username, change password,
+                or delete this account using the actions below. Click{" "}
+                <strong>"Change Password"</strong> to update credentials.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-lg shadow p-6">

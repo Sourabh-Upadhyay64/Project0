@@ -1,36 +1,51 @@
-import { useState, useEffect } from 'react'
-import { useAuth } from '../context/AuthContext'
-import { LogOut, Menu as MenuIcon, Users, Package, TrendingUp, ShoppingCart, AlertTriangle } from 'lucide-react'
-import Dashboard from '../components/admin/Dashboard'
-import MenuManagement from '../components/admin/MenuManagement'
-import InventoryManagement from '../components/admin/InventoryManagement'
-import UserManagement from '../components/admin/UserManagement'
+import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import {
+  LogOut,
+  Menu as MenuIcon,
+  Users,
+  Package,
+  TrendingUp,
+  QrCode,
+} from "lucide-react";
+import Dashboard from "../components/admin/Dashboard";
+import MenuManagement from "../components/admin/MenuManagement";
+import InventoryManagement from "../components/admin/InventoryManagement";
+import UserManagement from "../components/admin/UserManagement";
+import TableManagement from "../components/admin/TableManagement";
 
-type Tab = 'dashboard' | 'menu' | 'inventory' | 'users'
+type Tab = "dashboard" | "menu" | "inventory" | "users" | "tables";
 
 const AdminHome = () => {
-  const { logout, user } = useAuth()
-  const [activeTab, setActiveTab] = useState<Tab>('dashboard')
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const { logout, user } = useAuth();
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const handleLogout = () => {
-    logout()
-  }
+    logout();
+  };
 
   const tabs = [
-    { id: 'dashboard' as Tab, name: 'Dashboard', icon: TrendingUp },
-    { id: 'menu' as Tab, name: 'Menu Management', icon: MenuIcon },
-    { id: 'inventory' as Tab, name: 'Inventory', icon: Package },
-    { id: 'users' as Tab, name: 'Kitchen Staff', icon: Users },
-  ]
+    { id: "dashboard" as Tab, name: "Dashboard", icon: TrendingUp },
+    { id: "menu" as Tab, name: "Menu Management", icon: MenuIcon },
+    { id: "inventory" as Tab, name: "Inventory", icon: Package },
+    { id: "tables" as Tab, name: "Table Management", icon: QrCode },
+    { id: "users" as Tab, name: "Kitchen Staff", icon: Users },
+  ];
 
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-64' : 'w-20'} bg-blue-900 text-white transition-all duration-300`}>
+      <div
+        className={`${
+          sidebarOpen ? "w-64" : "w-20"
+        } bg-blue-900 text-white transition-all duration-300`}
+      >
         <div className="p-4">
           <div className="flex items-center justify-between mb-8">
-            {sidebarOpen && <h1 className="text-xl font-bold">QuickServe Admin</h1>}
+            {sidebarOpen && (
+              <h1 className="text-xl font-bold">QuickServe Admin</h1>
+            )}
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-2 hover:bg-blue-800 rounded-lg"
@@ -46,8 +61,8 @@ const AdminHome = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-blue-700 text-white'
-                    : 'text-blue-100 hover:bg-blue-800'
+                    ? "bg-blue-700 text-white"
+                    : "text-blue-100 hover:bg-blue-800"
                 }`}
               >
                 <tab.icon className="w-5 h-5" />
@@ -60,9 +75,12 @@ const AdminHome = () => {
         <div className="absolute bottom-4 left-4 right-4">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-3 p-3 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+            className={`${
+              sidebarOpen ? "w-full" : "w-10"
+            } flex items-center justify-center gap-2 px-2 py-1.5 bg-red-600 hover:bg-red-700 rounded text-xs transition-colors`}
+            title="Logout"
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-3.5 h-3.5" />
             {sidebarOpen && <span>Logout</span>}
           </button>
         </div>
@@ -73,19 +91,20 @@ const AdminHome = () => {
         <div className="p-8">
           <div className="mb-6">
             <h2 className="text-3xl font-bold text-gray-800">
-              {tabs.find(t => t.id === activeTab)?.name}
+              {tabs.find((t) => t.id === activeTab)?.name}
             </h2>
             <p className="text-gray-600">Welcome back, {user?.username}!</p>
           </div>
 
-          {activeTab === 'dashboard' && <Dashboard />}
-          {activeTab === 'menu' && <MenuManagement />}
-          {activeTab === 'inventory' && <InventoryManagement />}
-          {activeTab === 'users' && <UserManagement />}
+          {activeTab === "dashboard" && <Dashboard />}
+          {activeTab === "menu" && <MenuManagement />}
+          {activeTab === "inventory" && <InventoryManagement />}
+          {activeTab === "tables" && <TableManagement />}
+          {activeTab === "users" && <UserManagement />}
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AdminHome
+export default AdminHome;

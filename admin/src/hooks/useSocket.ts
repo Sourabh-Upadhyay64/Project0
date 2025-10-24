@@ -1,31 +1,32 @@
-import { useEffect, useState } from 'react'
-import { io, Socket } from 'socket.io-client'
+import { useEffect, useState } from "react";
+import { io, Socket } from "socket.io-client";
 
 export const useSocket = () => {
-  const [socket, setSocket] = useState<Socket | null>(null)
+  const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const socketInstance = io('http://localhost:3000', {
-      transports: ['websocket'],
+    const socketInstance = io({
+      path: "/socket.io",
+      transports: ["websocket"],
       auth: {
-        token: localStorage.getItem('token'),
+        token: localStorage.getItem("token"),
       },
-    })
+    });
 
-    socketInstance.on('connect', () => {
-      console.log('Socket connected')
-    })
+    socketInstance.on("connect", () => {
+      console.log("Socket connected");
+    });
 
-    socketInstance.on('disconnect', () => {
-      console.log('Socket disconnected')
-    })
+    socketInstance.on("disconnect", () => {
+      console.log("Socket disconnected");
+    });
 
-    setSocket(socketInstance)
+    setSocket(socketInstance);
 
     return () => {
-      socketInstance.disconnect()
-    }
-  }, [])
+      socketInstance.disconnect();
+    };
+  }, []);
 
-  return socket
-}
+  return socket;
+};
