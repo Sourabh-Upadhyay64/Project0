@@ -30,9 +30,7 @@ export interface Order {
 }
 
 class OrderService {
-  private apiUrl = import.meta.env.VITE_API_URL
-    ? `${import.meta.env.VITE_API_URL}/api`
-    : "/api";
+  private apiUrl = "/api";
 
   async createOrder(orderData: Partial<Order>): Promise<Order> {
     try {

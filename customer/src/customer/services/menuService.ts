@@ -26,9 +26,7 @@ export interface MenuCategory {
 }
 
 class MenuService {
-  private apiUrl = import.meta.env.VITE_API_URL
-    ? `${import.meta.env.VITE_API_URL}/api/menu`
-    : "/api/menu";
+  private apiUrl = "/api/menu";
 
   async getMenu(): Promise<MenuCategory[]> {
     try {
