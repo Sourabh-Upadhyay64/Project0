@@ -4,10 +4,16 @@ import MenuItem from "../models/MenuItem.js";
 import Table from "../models/Table.js";
 
 const router = express.Router();
+// Toggle to control whether orders are persisted to DB. Set SAVE_ORDERS=true to enable saves.
+const SAVE_ORDERS = process.env.SAVE_ORDERS === "true";
 
 // Get all active orders (not delivered or cancelled)
 router.get("/active", async (req, res) => {
   try {
+    if (!SAVE_ORDERS) {
+      // Orders are not persisted — return empty list when persistence disabled
+      return res.json([]);
+    }
     const orders = await Order.find({
       status: { $in: ["pending", "preparing", "prepared"] },
     }).sort({ createdAt: -1 });
@@ -20,6 +26,10 @@ router.get("/active", async (req, res) => {
 // Get all orders
 router.get("/", async (req, res) => {
   try {
+    if (!SAVE_ORDERS) {
+      // Persistence disabled — no historical orders available
+      return res.json([]);
+    }
     const { status, startDate, endDate, tableId } = req.query;
     const filter = {};
 
@@ -47,6 +57,9 @@ router.get("/", async (req, res) => {
 // Get orders by tableId
 router.get("/by-table/:tableId", async (req, res) => {
   try {
+    if (!SAVE_ORDERS) {
+      return res.json([]);
+    }
     const orders = await Order.find({
       tableId: req.params.tableId,
     }).sort({ createdAt: -1 });
@@ -140,8 +153,21 @@ router.post("/", async (req, res) => {
       status: "preparing",
     });
 
-    // Don't save to MongoDB - just create the order object
-    // await order.save();
+    // Persist order only when SAVE_ORDERS is enabled. Otherwise keep it transient.
+    if (SAVE_ORDERS) {
+      await order.save();
+      console.log(
+        "Order saved to DB:",
+        order._id,
+        "orderNumber:",
+        order.orderNumber
+      );
+    } else {
+      // Ensure transient order has timestamps
+      order.createdAt = order.createdAt || new Date();
+      order.updatedAt = new Date();
+      console.log("Order processing transient (not saved):", order.orderNumber);
+    }
 
     // Emit socket event for new order
     const io = req.app.get("io");
@@ -158,17 +184,27 @@ router.post("/", async (req, res) => {
 router.put("/:id/status", async (req, res) => {
   try {
     const { status } = req.body;
-    const order = await Order.findByIdAndUpdate(
-      req.params.id,
-      { status },
-      { new: true }
-    );
+    let order;
+    if (SAVE_ORDERS) {
+      order = await Order.findByIdAndUpdate(
+        req.params.id,
+        { status },
+        { new: true }
+      );
 
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+    } else {
+      // Persistence disabled — construct a transient order object to emit
+      order = {
+        _id: req.params.id,
+        status,
+        updatedAt: new Date(),
+      };
     }
 
-    // Emit socket event for order update
+    // Emit socket event for order update (transient or persisted)
     const io = req.app.get("io");
     io.emit("order-updated", order);
 
@@ -181,6 +217,12 @@ router.put("/:id/status", async (req, res) => {
 // Get single order
 router.get("/:id", async (req, res) => {
   try {
+    if (!SAVE_ORDERS) {
+      return res
+        .status(404)
+        .json({ message: "Order not found (persistence disabled)" });
+    }
+
     const order = await Order.findById(req.params.id);
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
