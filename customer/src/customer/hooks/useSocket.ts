@@ -15,7 +15,8 @@ export const useSocket = (options: UseSocketOptions = {}) => {
 
   useEffect(() => {
     // Connect to socket server
-    socketRef.current = io({
+    const socketUrl = import.meta.env.VITE_API_URL || undefined;
+    socketRef.current = io(socketUrl, {
       path: "/socket.io",
       transports: ["websocket"],
       reconnection: true,

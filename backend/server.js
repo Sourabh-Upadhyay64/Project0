@@ -17,12 +17,21 @@ const app = express();
 const httpServer = createServer(app);
 
 // CORS origins - Admin, Kitchen, and Customer apps
+const envOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+  : [];
+
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:5174",
   "http://localhost:5175", // Admin panel
   "http://localhost:8080", // Customer app
+  ...envOrigins, // Production origins from env
 ];
+
+console.log("Allowed CORS origins:", allowedOrigins);
 
 const io = new Server(httpServer, {
   cors: {

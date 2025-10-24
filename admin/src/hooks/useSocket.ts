@@ -5,7 +5,8 @@ export const useSocket = () => {
   const [socket, setSocket] = useState<Socket | null>(null);
 
   useEffect(() => {
-    const socketInstance = io({
+    const socketUrl = import.meta.env.VITE_API_URL || undefined;
+    const socketInstance = io(socketUrl, {
       path: "/socket.io",
       transports: ["websocket"],
       auth: {
