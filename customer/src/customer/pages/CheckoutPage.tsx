@@ -9,7 +9,8 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { useCart } from "../context/CartContext";
 import { useOrder } from "../hooks/useOrder";
-// import { WhatsAppModal } from '../components/WhatsAppModal'; // Disabled for now
+import { PaymentMethodSelector } from "../components/PaymentMethodSelector";
+import { paymentService } from "../services/paymentService";
 import { toast } from "sonner";
 
 export const CheckoutPage = () => {
@@ -20,8 +21,8 @@ export const CheckoutPage = () => {
   const [discount, setDiscount] = useState(0);
   const [splitEnabled, setSplitEnabled] = useState(false);
   const [splitCount, setSplitCount] = useState(2);
-  // const [showWhatsAppModal, setShowWhatsAppModal] = useState(false); // Disabled for now
-  // const [pendingOrder, setPendingOrder] = useState<any>(null); // Disabled for now
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card" | "upi" | null>(null);
+  const [processingPayment, setProcessingPayment] = useState(false);
 
   const subtotal = getCartTotal();
   const tax = subtotal * 0.09; // 9% tax
@@ -48,7 +49,15 @@ export const CheckoutPage = () => {
   };
 
   const handlePlaceOrder = async () => {
+    // Validate payment method selection
+    if (!paymentMethod) {
+      toast.error("Please select a payment method");
+      return;
+    }
+
     try {
+      setProcessingPayment(true);
+
       const orderData = {
         items: cart,
         subtotal,
@@ -59,19 +68,60 @@ export const CheckoutPage = () => {
         splitBill: splitEnabled,
         splitCount: splitEnabled ? splitCount : undefined,
         promoCode: promoCode || undefined,
-        // WhatsApp feature disabled for now
-        // whatsappNumber: phoneNumber,
+        paymentMethod,
       };
 
       setSplitBill(splitEnabled, splitEnabled ? splitCount : undefined);
       const order = await placeOrder(orderData);
 
-      clearCart();
-      toast.success("Order placed successfully!");
-      navigate(`/customer/order-status?orderId=${order.id}`);
+      // Handle different payment methods
+      if (paymentMethod === "upi") {
+        // Initiate UPI payment
+        const upiData = await paymentService.initiateUpiPayment(
+          order.id,
+          total
+        );
+
+        // Open UPI app
+        paymentService.openUpiApp(upiData.upiLink);
+
+        // Show instructions
+        toast.info("Complete payment in your UPI app", {
+          description: "You'll be redirected after payment",
+          duration: 5000,
+        });
+
+        // Navigate to order status page where we'll poll for payment
+        clearCart();
+        navigate(`/customer/order-status?orderId=${order.id}&awaitingPayment=true`);
+      } else if (paymentMethod === "cash") {
+        // Update payment status to pending (will pay at counter)
+        await paymentService.updatePaymentStatus(
+          order.id,
+          "cash",
+          "pending"
+        );
+
+        clearCart();
+        toast.success("Order placed! Pay at the counter");
+        navigate(`/customer/order-status?orderId=${order.id}`);
+      } else if (paymentMethod === "card") {
+        // Update payment status to pending (will pay at counter)
+        await paymentService.updatePaymentStatus(
+          order.id,
+          "card",
+          "pending"
+        );
+
+        clearCart();
+        toast.success("Order placed! Pay with card at the counter");
+        navigate(`/customer/order-status?orderId=${order.id}`);
+      }
     } catch (error) {
       console.error("Order placement failed:", error);
       toast.error("Failed to place order. Please try again.");
+    } finally {
+      setProcessingPayment(false);
     }
   };
 
@@ -254,23 +304,32 @@ export const CheckoutPage = () => {
           </div>
         </Card>
 
+        {/* Payment Method Selection */}
+        <Card className="p-6">
+          <PaymentMethodSelector
+            selectedMethod={paymentMethod}
+            onSelect={setPaymentMethod}
+          />
+        </Card>
+
         {/* Place Order Button */}
         <Button
           onClick={handlePlaceOrder}
           size="lg"
           className="w-full h-14 text-base"
-          disabled={loading}
+          disabled={loading || processingPayment || !paymentMethod}
         >
-          {loading ? "Placing Order..." : "Place Order"}
+          {processingPayment
+            ? "Processing..."
+            : paymentMethod === "upi"
+            ? "Proceed to UPI Payment"
+            : paymentMethod === "cash"
+            ? "Place Order - Pay Cash"
+            : paymentMethod === "card"
+            ? "Place Order - Pay by Card"
+            : "Select Payment Method"}
         </Button>
       </div>
-
-      {/* WhatsApp Modal - Disabled for now */}
-      {/* <WhatsAppModal
-        open={showWhatsAppModal}
-        onOpenChange={setShowWhatsAppModal}
-        onSubmit={handleWhatsAppSubmit}
-      /> */}
     </div>
   );
 };

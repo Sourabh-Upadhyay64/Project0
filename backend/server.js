@@ -10,6 +10,7 @@ import orderRoutes from "./routes/orders.js";
 import userRoutes from "./routes/users.js";
 import analyticsRoutes from "./routes/analytics.js";
 import tableRoutes from "./routes/tables.js";
+import paymentRoutes from "./routes/payment.js";
 
 dotenv.config();
 
@@ -138,6 +139,9 @@ console.log("✓ Analytics routes registered at /api/analytics");
 app.use("/api/tables", tableRoutes);
 console.log("✓ Table routes registered at /api/tables");
 
+app.use("/api/payment", paymentRoutes);
+console.log("✓ Payment routes registered at /api/payment");
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date() });
@@ -151,10 +155,10 @@ app.get("/", (req, res) => {
 // 404 handler - catch any unmatched routes
 app.use((req, res, next) => {
   console.log(`[404] Route not found: ${req.method} ${req.url}`);
-  res.status(404).json({ 
-    message: "Route not found", 
+  res.status(404).json({
+    message: "Route not found",
     path: req.url,
-    method: req.method 
+    method: req.method,
   });
 });
 

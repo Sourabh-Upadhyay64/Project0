@@ -72,7 +72,12 @@ router.get("/by-table/:tableId", async (req, res) => {
 // Create order
 router.post("/", async (req, res) => {
   try {
-    const { tableNumber, tableId, items, customerPhone } = req.body;
+    const { tableNumber, tableId, items, customerPhone, paymentMethod } = req.body;
+
+    // Validate payment method if provided
+    if (paymentMethod && !["cash", "card", "upi"].includes(paymentMethod)) {
+      return res.status(400).json({ message: "Invalid payment method" });
+    }
 
     // If tableId is provided, verify it exists and get the table info
     let finalTableId = tableId;
@@ -151,6 +156,8 @@ router.post("/", async (req, res) => {
       items: orderItems,
       totalAmount,
       status: "preparing",
+      paymentMethod: paymentMethod || "cash",
+      paymentStatus: paymentMethod === "upi" ? "pending" : "pending",
     });
 
     // Persist order only when SAVE_ORDERS is enabled. Otherwise keep it transient.
