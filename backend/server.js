@@ -1,7 +1,6 @@
 import express from "express";
 import { createServer } from "http";
 import { Server } from "socket.io";
-import cors from "cors";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 
@@ -36,26 +35,37 @@ const allowedOrigins = [
 
 console.log("Allowed CORS origins:", allowedOrigins);
 
-// Use cors middleware dynamically
-const corsOptions = {
-  origin: (origin, callback) => {
-    // allow Postman/server-to-server requests with no origin
-    if (!origin) return callback(null, true);
-
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.log("✗ BLOCKED CORS ORIGIN:", origin);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept"]
-};
-
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions)); // Handle preflight OPTIONS globally
+// CORS middleware - manual implementation for better control
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Log every request origin for debugging
+  console.log(`[CORS] Request from: ${origin || 'no-origin'} - Method: ${req.method}`);
+  
+  // Check if origin is allowed
+  if (origin && allowedOrigins.includes(origin)) {
+    // Set CORS headers for allowed origins
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept');
+    res.setHeader('Access-Control-Max-Age', '86400'); // 24 hours
+    console.log(`[CORS] ✓ Allowed origin: ${origin}`);
+  } else if (!origin) {
+    // Allow requests with no origin (curl, Postman, server-to-server)
+    console.log('[CORS] ✓ No origin (non-browser request)');
+  } else {
+    console.log(`[CORS] ✗ BLOCKED: ${origin}`);
+  }
+  
+  // Handle preflight OPTIONS requests
+  if (req.method === 'OPTIONS') {
+    console.log('[CORS] Handling OPTIONS preflight request');
+    return res.status(200).end();
+  }
+  
+  next();
+});
 
 // ============================
 // Middleware
