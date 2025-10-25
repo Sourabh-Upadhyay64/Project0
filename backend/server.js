@@ -43,91 +43,54 @@ const io = new Server(httpServer, {
 });
 
 // ====================================
-// COMPREHENSIVE CORS CONFIGURATION
+// CORS MIDDLEWARE CONFIGURATION
 // ====================================
 
-// Define CORS options
-const corsOptions = {
-  // Step 1: Check if the requesting origin is in our allowed list
-  origin: function (origin, callback) {
-    console.log("Incoming request from origin:", origin);
-
-    // Step 2: Allow requests with no origin (mobile apps, postman, curl, server-to-server)
-    if (!origin) {
-      console.log("✓ Allowing request with no origin (non-browser)");
-      return callback(null, true);
-    }
-
-    // Step 3: Check if origin is in our allowedOrigins array
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      console.log("✓ Origin allowed:", origin);
-      callback(null, true);
-    } else {
-      console.log("✗ Origin BLOCKED by CORS:", origin);
-      console.log("Allowed origins are:", allowedOrigins);
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-
-  // Step 4: Allow credentials (cookies, authorization headers, TLS client certificates)
-  credentials: true,
-
-  // Step 5: Expose these headers to the frontend JavaScript
-  exposedHeaders: ["Authorization"],
-
-  // Step 6: Allow these HTTP methods
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-
-  // Step 7: Allow these headers in requests
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-    "X-Requested-With",
-    "Accept",
-    "Origin",
-  ],
-
-  // Step 8: Cache preflight requests for 1 hour (3600 seconds)
-  // This reduces the number of OPTIONS requests
-  maxAge: 3600,
-
-  // Step 9: Pass the CORS preflight response to the next handler
-  preflightContinue: false,
-
-  // Step 10: Provide a successful status for OPTIONS requests
-  optionsSuccessStatus: 204,
-};
-
-// Apply CORS middleware with our options
-app.use(cors(corsOptions));
-
-// Handle preflight requests explicitly for all routes
-app.options("*", cors(corsOptions));
-
-// Manual CORS headers as additional safety layer
+// Step 1: Handle CORS manually with custom middleware
 app.use((req, res, next) => {
   const origin = req.headers.origin;
 
-  // Only set headers if origin is allowed
+  console.log("Incoming request from origin:", origin);
+
+  // Step 2: Check if origin is in our allowed list
   if (origin && allowedOrigins.includes(origin)) {
+    // Step 3: Allow this specific origin (never use '*' with credentials)
     res.setHeader("Access-Control-Allow-Origin", origin);
+
+    // Step 4: Allow credentials (cookies, authorization headers)
     res.setHeader("Access-Control-Allow-Credentials", "true");
+
+    // Step 5: Specify allowed HTTP methods
     res.setHeader(
       "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, PATCH, OPTIONS"
+      "GET, POST, PUT, DELETE, OPTIONS"
     );
+
+    // Step 6: Specify allowed headers for JSON requests and authentication
     res.setHeader(
       "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+      "Content-Type, Authorization, X-Requested-With, Accept"
     );
+
+    // Step 7: Cache preflight response for 1 hour to reduce OPTIONS requests
     res.setHeader("Access-Control-Max-Age", "3600");
+
+    console.log("✓ CORS headers set for origin:", origin);
+  } else if (origin) {
+    console.log("✗ Origin BLOCKED by CORS:", origin);
+    console.log("Allowed origins:", allowedOrigins);
+  } else {
+    // Step 8: Allow requests with no origin (Postman, curl, server-to-server)
+    console.log("✓ Request with no origin (non-browser)");
   }
 
-  // Handle preflight
+  // Step 9: Handle preflight OPTIONS requests
   if (req.method === "OPTIONS") {
+    // Respond with 204 No Content for successful preflight
     return res.status(204).end();
   }
 
+  // Step 10: Continue to next middleware/route handler
   next();
 });
 
