@@ -31,7 +31,9 @@ const allowedOrigins = [
   ...envOrigins, // Production origins from env
 ];
 
-console.log("Allowed CORS origins:", allowedOrigins);
+console.log("Environment ALLOWED_ORIGINS:", process.env.ALLOWED_ORIGINS);
+console.log("Parsed env origins:", envOrigins);
+console.log("Final allowed CORS origins:", allowedOrigins);
 
 const io = new Server(httpServer, {
   cors: {
@@ -43,7 +45,18 @@ const io = new Server(httpServer, {
 // Middleware
 app.use(
   cors({
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      console.log("Request origin:", origin);
+      // Allow requests with no origin (mobile apps, postman, curl, etc.)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        console.log("Origin blocked by CORS:", origin);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   })
 );
@@ -82,9 +95,9 @@ app.get("/api/health", (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 
-app.get("/" , (req,res)=>{
+app.get("/", (req, res) => {
   res.send("Server is running fine");
-})
+});
 
 httpServer.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
