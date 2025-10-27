@@ -11,6 +11,7 @@ import userRoutes from "./routes/users.js";
 import analyticsRoutes from "./routes/analytics.js";
 import tableRoutes from "./routes/tables.js";
 import paymentRoutes from "./routes/payment.js";
+import ratingRoutes from "./routes/ratings.js";
 
 dotenv.config();
 
@@ -141,6 +142,9 @@ console.log("✓ Table routes registered at /api/tables");
 
 app.use("/api/payment", paymentRoutes);
 console.log("✓ Payment routes registered at /api/payment");
+
+app.use("/api/ratings", ratingRoutes);
+console.log("✓ Rating routes registered at /api/ratings");
 
 // Health check
 app.get("/api/health", (req, res) => {
