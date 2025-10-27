@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useCart } from "../context/CartContext";
 import { MenuItem as MenuItemType } from "../services/menuService";
+import { formatCurrency } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
@@ -157,7 +158,7 @@ export const MenuItem = ({ item }: MenuItemProps) => {
 
           <div className="flex items-center justify-between">
             <span className="font-bold text-primary text-lg">
-              ${item.price.toFixed(2)}
+              {formatCurrency(item.price)}
             </span>
 
             {item.inStock && (
@@ -206,7 +207,7 @@ export const MenuItem = ({ item }: MenuItemProps) => {
                                       {variant.name}
                                     </span>
                                     <span className="ml-auto text-primary font-semibold">
-                                      ${variant.price.toFixed(2)}
+                                      {formatCurrency(variant.price)}
                                     </span>
                                   </Label>
                                 </div>
@@ -240,7 +241,7 @@ export const MenuItem = ({ item }: MenuItemProps) => {
                                   >
                                     <span>{addOn.name}</span>
                                     <span className="ml-auto text-primary font-semibold">
-                                      +${addOn.price.toFixed(2)}
+                                      +{formatCurrency(addOn.price)}
                                     </span>
                                   </Label>
                                 </div>
@@ -282,7 +283,7 @@ export const MenuItem = ({ item }: MenuItemProps) => {
                           <div className="flex justify-between items-center mb-4">
                             <span className="text-lg font-semibold">Total</span>
                             <span className="text-2xl font-bold text-primary">
-                              ${(getPrice() * quantity).toFixed(2)}
+                              {formatCurrency(getPrice() * quantity)}
                             </span>
                           </div>
                           <Button

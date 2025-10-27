@@ -1,5 +1,6 @@
-import { ShoppingCart, Plus, Minus, Trash2, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ShoppingCart, Plus, Minus, Trash2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/lib/utils";
 import {
   Sheet,
   SheetContent,
@@ -7,12 +8,12 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/ui/sheet';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { useCart } from '../context/CartContext';
-import { useNavigate } from 'react-router-dom';
-import { Badge } from '@/components/ui/badge';
+} from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
+import { Badge } from "@/components/ui/badge";
 
 export const CartDrawer = () => {
   const {
@@ -27,7 +28,7 @@ export const CartDrawer = () => {
   const itemCount = getItemCount();
 
   const handleCheckout = () => {
-    navigate('/customer/checkout');
+    navigate("/customer/checkout");
   };
 
   return (
@@ -48,11 +49,14 @@ export const CartDrawer = () => {
         </Button>
       </SheetTrigger>
 
-      <SheetContent side="bottom" className="h-[90vh] rounded-t-2xl flex flex-col">
+      <SheetContent
+        side="bottom"
+        className="h-[90vh] rounded-t-2xl flex flex-col"
+      >
         <SheetHeader className="pb-4 flex-shrink-0">
           <SheetTitle className="text-2xl">Your Cart</SheetTitle>
           <SheetDescription>
-            {itemCount} {itemCount === 1 ? 'item' : 'items'} in your cart
+            {itemCount} {itemCount === 1 ? "item" : "items"} in your cart
           </SheetDescription>
         </SheetHeader>
 
@@ -60,7 +64,9 @@ export const CartDrawer = () => {
           <div className="flex flex-col items-center justify-center flex-1 text-center">
             <ShoppingCart className="w-16 h-16 text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold mb-2">Your cart is empty</h3>
-            <p className="text-muted-foreground">Add some delicious items to get started!</p>
+            <p className="text-muted-foreground">
+              Add some delicious items to get started!
+            </p>
           </div>
         ) : (
           <div className="flex flex-col flex-1 min-h-0">
@@ -77,16 +83,22 @@ export const CartDrawer = () => {
                       />
                     )}
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-base leading-tight mb-1">{item.name}</h4>
+                      <h4 className="font-semibold text-base leading-tight mb-1">
+                        {item.name}
+                      </h4>
                       {item.variant && (
-                        <p className="text-sm text-muted-foreground">{item.variant}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {item.variant}
+                        </p>
                       )}
                       {item.addOns && item.addOns.length > 0 && (
                         <p className="text-xs text-muted-foreground">
-                          + {item.addOns.map((a) => a.name).join(', ')}
+                          + {item.addOns.map((a) => a.name).join(", ")}
                         </p>
                       )}
-                      <p className="text-primary font-bold mt-1">${item.price.toFixed(2)}</p>
+                      <p className="text-primary font-bold mt-1">
+                        {formatCurrency(item.price)}
+                      </p>
                     </div>
                     <Button
                       variant="ghost"
@@ -104,34 +116,45 @@ export const CartDrawer = () => {
                         variant="outline"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        onClick={() =>
+                          updateQuantity(item.id, item.quantity - 1)
+                        }
                       >
                         <Minus className="w-4 h-4" />
                       </Button>
-                      <span className="w-8 text-center font-semibold">{item.quantity}</span>
+                      <span className="w-8 text-center font-semibold">
+                        {item.quantity}
+                      </span>
                       <Button
                         variant="outline"
                         size="icon"
                         className="h-8 w-8"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        onClick={() =>
+                          updateQuantity(item.id, item.quantity + 1)
+                        }
                       >
                         <Plus className="w-4 h-4" />
                       </Button>
                     </div>
                     <span className="font-bold text-lg">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {formatCurrency(item.price * item.quantity)}
                     </span>
                   </div>
 
                   <div className="mt-3">
-                    <Label htmlFor={`instructions-${item.id}`} className="text-xs">
+                    <Label
+                      htmlFor={`instructions-${item.id}`}
+                      className="text-xs"
+                    >
                       Special Instructions
                     </Label>
                     <Textarea
                       id={`instructions-${item.id}`}
                       placeholder="e.g., No onions, extra sauce"
-                      value={item.instructions || ''}
-                      onChange={(e) => updateInstructions(item.id, e.target.value)}
+                      value={item.instructions || ""}
+                      onChange={(e) =>
+                        updateInstructions(item.id, e.target.value)
+                      }
                       className="mt-1 text-sm h-16 resize-none"
                     />
                   </div>
@@ -143,9 +166,15 @@ export const CartDrawer = () => {
             <div className="border-t pt-4 pb-2 space-y-3 flex-shrink-0 bg-background">
               <div className="flex justify-between text-lg">
                 <span className="font-semibold">Subtotal</span>
-                <span className="font-bold text-primary text-xl">${getCartTotal().toFixed(2)}</span>
+                <span className="font-bold text-primary text-xl">
+                  {formatCurrency(getCartTotal())}
+                </span>
               </div>
-              <Button onClick={handleCheckout} size="lg" className="w-full h-14 text-base font-semibold">
+              <Button
+                onClick={handleCheckout}
+                size="lg"
+                className="w-full h-14 text-base font-semibold"
+              >
                 Proceed to Checkout
               </Button>
             </div>

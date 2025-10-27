@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { formatCurrency } from "@/lib/utils";
 import { useCart } from "../context/CartContext";
 import { useOrder } from "../hooks/useOrder";
 import { PaymentMethodSelector } from "../components/PaymentMethodSelector";
@@ -186,7 +187,7 @@ export const CheckoutPage = () => {
                   {item.variant && ` (${item.variant})`}
                 </span>
                 <span className="font-semibold">
-                  ${(item.price * item.quantity).toFixed(2)}
+                  {formatCurrency(item.price * item.quantity)}
                 </span>
               </div>
             ))}
@@ -216,7 +217,7 @@ export const CheckoutPage = () => {
           </div>
           {discount > 0 && (
             <p className="text-sm text-success mt-2">
-              Discount applied: -${discount.toFixed(2)}
+              Discount applied: -{formatCurrency(discount)}
             </p>
           )}
         </Card>
@@ -259,7 +260,7 @@ export const CheckoutPage = () => {
                 className="h-12"
               />
               <p className="text-sm text-muted-foreground">
-                ${splitAmount.toFixed(2)} per person
+                {formatCurrency(splitAmount)} per person
               </p>
             </div>
           )}
@@ -274,27 +275,27 @@ export const CheckoutPage = () => {
           <div className="space-y-2">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
+              <span>{formatCurrency(subtotal)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Tax (9%)</span>
-              <span>${tax.toFixed(2)}</span>
+              <span>{formatCurrency(tax)}</span>
             </div>
             {discount > 0 && (
               <div className="flex justify-between text-success">
                 <span>Discount</span>
-                <span>-${discount.toFixed(2)}</span>
+                <span>-{formatCurrency(discount)}</span>
               </div>
             )}
             <Separator />
             <div className="flex justify-between text-lg font-bold">
               <span>Total</span>
-              <span className="text-primary">${total.toFixed(2)}</span>
+              <span className="text-primary">{formatCurrency(total)}</span>
             </div>
             {splitEnabled && (
               <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Per Person ({splitCount} people)</span>
-                <span>${splitAmount.toFixed(2)}</span>
+                <span>{formatCurrency(splitAmount)}</span>
               </div>
             )}
           </div>

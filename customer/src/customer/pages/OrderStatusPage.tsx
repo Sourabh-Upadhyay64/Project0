@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle2, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { formatCurrency } from "@/lib/utils";
 import { useOrder } from "../hooks/useOrder";
 import { OrderStatusBanner } from "../components/OrderStatusBanner";
 import { OrderTrackingProgress } from "../components/OrderTrackingProgress";
@@ -135,7 +136,7 @@ export const OrderStatusPage = () => {
                       {item.quantity}x {item.name}
                     </span>
                     <span className="font-semibold">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {formatCurrency(item.price * item.quantity)}
                     </span>
                   </div>
                 ))}
@@ -153,22 +154,22 @@ export const OrderStatusPage = () => {
             <div className="space-y-2">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal</span>
-                <span>${currentOrder.subtotal.toFixed(2)}</span>
+                <span>{formatCurrency(currentOrder.subtotal)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Tax</span>
-                <span>${currentOrder.tax.toFixed(2)}</span>
+                <span>{formatCurrency(currentOrder.tax)}</span>
               </div>
               {currentOrder.discount > 0 && (
                 <div className="flex justify-between text-success">
                   <span>Discount</span>
-                  <span>-${currentOrder.discount.toFixed(2)}</span>
+                  <span>-{formatCurrency(currentOrder.discount)}</span>
                 </div>
               )}
               <div className="flex justify-between text-lg font-bold pt-2 border-t">
                 <span>Total</span>
                 <span className="text-primary">
-                  ${currentOrder.total.toFixed(2)}
+                  {formatCurrency(currentOrder.total)}
                 </span>
               </div>
             </div>
