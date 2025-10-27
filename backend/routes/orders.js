@@ -72,7 +72,8 @@ router.get("/by-table/:tableId", async (req, res) => {
 // Create order
 router.post("/", async (req, res) => {
   try {
-    const { tableNumber, tableId, items, customerPhone, paymentMethod } = req.body;
+    const { tableNumber, tableId, items, customerPhone, paymentMethod } =
+      req.body;
 
     // Validate payment method if provided
     if (paymentMethod && !["cash", "card", "upi"].includes(paymentMethod)) {

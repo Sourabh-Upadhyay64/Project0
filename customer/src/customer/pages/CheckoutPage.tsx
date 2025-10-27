@@ -21,7 +21,9 @@ export const CheckoutPage = () => {
   const [discount, setDiscount] = useState(0);
   const [splitEnabled, setSplitEnabled] = useState(false);
   const [splitCount, setSplitCount] = useState(2);
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "card" | "upi" | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<
+    "cash" | "card" | "upi" | null
+  >(null);
   const [processingPayment, setProcessingPayment] = useState(false);
 
   const subtotal = getCartTotal();
@@ -93,25 +95,19 @@ export const CheckoutPage = () => {
 
         // Navigate to order status page where we'll poll for payment
         clearCart();
-        navigate(`/customer/order-status?orderId=${order.id}&awaitingPayment=true`);
+        navigate(
+          `/customer/order-status?orderId=${order.id}&awaitingPayment=true`
+        );
       } else if (paymentMethod === "cash") {
         // Update payment status to pending (will pay at counter)
-        await paymentService.updatePaymentStatus(
-          order.id,
-          "cash",
-          "pending"
-        );
+        await paymentService.updatePaymentStatus(order.id, "cash", "pending");
 
         clearCart();
         toast.success("Order placed! Pay at the counter");
         navigate(`/customer/order-status?orderId=${order.id}`);
       } else if (paymentMethod === "card") {
         // Update payment status to pending (will pay at counter)
-        await paymentService.updatePaymentStatus(
-          order.id,
-          "card",
-          "pending"
-        );
+        await paymentService.updatePaymentStatus(order.id, "card", "pending");
 
         clearCart();
         toast.success("Order placed! Pay with card at the counter");

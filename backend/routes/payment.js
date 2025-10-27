@@ -18,11 +18,17 @@ router.post("/upi/initiate", async (req, res) => {
     // Get UPI details from environment variables
     const upiId = process.env.UPI_ID || "test@upi";
     const businessName = process.env.BUSINESS_NAME || "QuickServe";
-    
-    // Generate UPI deep link
-    const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(businessName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(`Order Payment - ${orderId}`)}`;
 
-    console.log(`[PAYMENT] UPI payment initiated for order: ${orderId}, amount: ${amount}`);
+    // Generate UPI deep link
+    const upiLink = `upi://pay?pa=${upiId}&pn=${encodeURIComponent(
+      businessName
+    )}&am=${amount}&cu=INR&tn=${encodeURIComponent(
+      `Order Payment - ${orderId}`
+    )}`;
+
+    console.log(
+      `[PAYMENT] UPI payment initiated for order: ${orderId}, amount: ${amount}`
+    );
 
     res.json({
       success: true,
@@ -54,30 +60,34 @@ router.post("/status", async (req, res) => {
     });
 
     if (!orderId || !paymentMethod || !paymentStatus) {
-      return res.status(400).json({ 
-        message: "Order ID, payment method, and payment status are required" 
+      return res.status(400).json({
+        message: "Order ID, payment method, and payment status are required",
       });
     }
 
     // Validate payment status
     const validStatuses = ["pending", "paid", "failed"];
     if (!validStatuses.includes(paymentStatus)) {
-      return res.status(400).json({ 
-        message: `Invalid payment status. Must be one of: ${validStatuses.join(", ")}` 
+      return res.status(400).json({
+        message: `Invalid payment status. Must be one of: ${validStatuses.join(
+          ", "
+        )}`,
       });
     }
 
     // Validate payment method
     const validMethods = ["cash", "card", "upi"];
     if (!validMethods.includes(paymentMethod)) {
-      return res.status(400).json({ 
-        message: `Invalid payment method. Must be one of: ${validMethods.join(", ")}` 
+      return res.status(400).json({
+        message: `Invalid payment method. Must be one of: ${validMethods.join(
+          ", "
+        )}`,
       });
     }
 
     // Find and update the order
     const order = await Order.findById(orderId);
-    
+
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
@@ -85,7 +95,7 @@ router.post("/status", async (req, res) => {
     // Update payment details
     order.paymentMethod = paymentMethod;
     order.paymentStatus = paymentStatus;
-    
+
     if (transactionId) {
       order.transactionId = transactionId;
     }
@@ -140,7 +150,7 @@ router.get("/verify/:orderId", async (req, res) => {
     const { orderId } = req.params;
 
     const order = await Order.findById(orderId);
-    
+
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
