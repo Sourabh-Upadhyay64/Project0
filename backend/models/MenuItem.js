@@ -18,6 +18,10 @@ const menuItemSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    isVegetarian: {
+      type: Boolean,
+      default: true,
+    },
     image: {
       type: String,
       default: "",

@@ -58,6 +58,7 @@ class MenuService {
           inStock: item.available !== false && (item.inventoryCount || 0) > 0,
           available: item.available,
           inventoryCount: item.inventoryCount,
+          isVegetarian: item.isVegetarian,
           averageRating: item.averageRating,
           totalRatings: item.totalRatings,
         };

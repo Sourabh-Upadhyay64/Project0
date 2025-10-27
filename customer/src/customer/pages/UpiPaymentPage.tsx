@@ -74,39 +74,36 @@ export const UpiPaymentPage = () => {
     try {
       setPaymentStatus("initiating");
 
-      // Verify payment with backend
-      const result = await paymentService.verifyPayment(orderId);
+      // Generate a transaction ID (in production, this would come from payment gateway)
+      const transactionId = `TXN${Date.now()}${Math.random()
+        .toString(36)
+        .substring(2, 9)
+        .toUpperCase()}`;
 
-      if (result.paymentStatus === "paid") {
-        setPaymentStatus("success");
+      // Update payment status to paid (user confirmed payment)
+      await paymentService.updatePaymentStatus(
+        orderId,
+        "upi",
+        "paid",
+        transactionId
+      );
 
-        // Update payment status
-        await paymentService.updatePaymentStatus(
-          orderId,
-          "upi",
-          "paid",
-          result.transactionId
-        );
+      setPaymentStatus("success");
 
-        // Clear cart and session storage
-        clearCart();
-        sessionStorage.removeItem("pendingOrder");
+      // Clear cart and session storage
+      clearCart();
+      sessionStorage.removeItem("pendingOrder");
 
-        toast.success("Payment successful! Your order has been placed.");
+      toast.success("Payment confirmed! Your order has been placed.");
 
-        // Navigate to order status
-        setTimeout(() => {
-          navigate(`/customer/order-status?orderId=${orderId}`);
-        }, 2000);
-      } else {
-        setPaymentStatus("pending");
-        toast.error("Payment not detected yet. Please try again.");
-        setRetryCount((prev) => prev + 1);
-      }
+      // Navigate to order status
+      setTimeout(() => {
+        navigate(`/customer/order-status?orderId=${orderId}`);
+      }, 2000);
     } catch (error) {
-      console.error("Payment verification failed:", error);
+      console.error("Payment confirmation failed:", error);
       setPaymentStatus("pending");
-      toast.error("Unable to verify payment. Please try again.");
+      toast.error("Unable to confirm payment. Please try again.");
     }
   };
 

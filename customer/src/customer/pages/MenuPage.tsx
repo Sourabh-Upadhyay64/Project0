@@ -8,11 +8,40 @@ import { CartDrawer } from "../components/CartDrawer";
 import { Recommendations } from "../components/Recommendations";
 import { Skeleton } from "@/components/ui/skeleton";
 
+// Predefined categories (same as admin)
+const MENU_CATEGORIES = [
+  "Breakfast",
+  "Lunch",
+  "Dinner",
+  "Snacks",
+  "Appetizers",
+  "Main Course",
+  "Desserts",
+  "Beverages",
+  "Drinks",
+  "Soups",
+  "Salads",
+  "Pizza",
+  "Burgers",
+  "Pasta",
+  "Rice & Biryani",
+  "Chinese",
+  "Indian",
+  "Continental",
+  "Fast Food",
+  "Healthy Options",
+  "Vegan",
+  "Sides",
+  "Combos",
+  "Other",
+] as const;
+
 export const MenuPage = () => {
   const navigate = useNavigate();
   const { menu, loading, error, getRecommendations } = useMenu();
   const recommendations = getRecommendations();
   const [tableId, setTableId] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -30,6 +59,19 @@ export const MenuPage = () => {
       if (t) setTableId(t);
     }
   }, []);
+
+  // Filter menu by category
+  const filteredMenu =
+    selectedCategory === "all"
+      ? menu
+      : menu
+          .map((category) => ({
+            ...category,
+            items: category.items.filter(
+              (item) => item.category === selectedCategory
+            ),
+          }))
+          .filter((category) => category.items.length > 0);
 
   if (loading) {
     return (
@@ -92,7 +134,26 @@ export const MenuPage = () => {
 
       {/* Menu Content */}
       <div className="container mx-auto px-4 py-6 space-y-8">
-        <MenuList menu={menu} />
+        {/* Category Filter */}
+        <div className="bg-card rounded-lg border shadow-sm p-4">
+          <label className="block text-sm font-medium text-foreground mb-3">
+            Filter by Category
+          </label>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+            className="w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary bg-background text-foreground"
+          >
+            <option value="all">All Categories</option>
+            {MENU_CATEGORIES.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <MenuList menu={filteredMenu} />
 
         {recommendations.length > 0 && (
           <Recommendations items={recommendations} />
