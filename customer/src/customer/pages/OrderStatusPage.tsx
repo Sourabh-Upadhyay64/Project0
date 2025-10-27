@@ -1,22 +1,70 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle2, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useOrder } from "../hooks/useOrder";
 import { OrderStatusBanner } from "../components/OrderStatusBanner";
+import { OrderTrackingProgress } from "../components/OrderTrackingProgress";
+import { FoodRating } from "../components/FoodRating";
+import { io, Socket } from "socket.io-client";
 
 export const OrderStatusPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const orderId = searchParams.get("orderId");
   const { currentOrder, getOrderStatus } = useOrder();
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [showRating, setShowRating] = useState(false);
 
+  // Initialize WebSocket connection for real-time updates
+  useEffect(() => {
+    const apiUrl = import.meta.env.VITE_API_URL || "https://project0-f2hv.onrender.com";
+    const newSocket = io(apiUrl, {
+      transports: ["websocket", "polling"],
+    });
+
+    setSocket(newSocket);
+
+    return () => {
+      newSocket.close();
+    };
+  }, []);
+
+  // Listen for order status updates via WebSocket
+  useEffect(() => {
+    if (!socket || !orderId) return;
+
+    console.log("[OrderStatus] Listening for order updates:", orderId);
+
+    // Listen for order update events
+    socket.on("order-updated", (updatedOrder) => {
+      console.log("[OrderStatus] Order updated:", updatedOrder);
+      if (updatedOrder._id === orderId || updatedOrder.id === orderId) {
+        // Refresh order status
+        getOrderStatus(orderId);
+      }
+    });
+
+    return () => {
+      socket.off("order-updated");
+    };
+  }, [socket, orderId]);
+
+  // Fetch initial order status
   useEffect(() => {
     if (orderId) {
       getOrderStatus(orderId);
     }
   }, [orderId]);
+
+  // Show rating form when order is delivered
+  useEffect(() => {
+    if (currentOrder?.status === "delivered") {
+      // Delay showing rating to give user time to see completion
+      setTimeout(() => setShowRating(true), 2000);
+    }
+  }, [currentOrder?.status]);
 
   if (!orderId || !currentOrder) {
     return (
@@ -53,10 +101,27 @@ export const OrderStatusPage = () => {
             <p className="text-muted-foreground text-lg mb-1">
               Order #{currentOrder.id}
             </p>
-            {/* <p className="text-sm text-muted-foreground">
-              We'll keep you updated on WhatsApp
-            </p> */}
           </Card>
+
+          {/* Order Tracking Progress */}
+          <Card className="p-6">
+            <h2 className="text-xl font-bold mb-6">Track Your Order</h2>
+            <OrderTrackingProgress
+              currentStatus={currentOrder.status}
+              orderNumber={currentOrder.id}
+            />
+          </Card>
+
+          {/* Food Rating - Show only when order is delivered */}
+          {showRating && currentOrder.status === "delivered" && (
+            <FoodRating
+              orderId={currentOrder.id}
+              orderNumber={currentOrder.id}
+              onRatingSubmitted={() => {
+                console.log("Rating submitted successfully");
+              }}
+            />
+          )}
 
           {/* Order Summary */}
           <Card className="p-6">
