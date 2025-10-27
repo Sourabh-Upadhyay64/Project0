@@ -237,17 +237,26 @@ const MenuManagement = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Category
+                    Category <span className="text-red-500">*</span>
                   </label>
                   <select
                     value={formData.category}
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
-                    className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-900 cursor-pointer appearance-none"
+                    style={{
+                      backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
+                      backgroundPosition: "right 0.5rem center",
+                      backgroundRepeat: "no-repeat",
+                      backgroundSize: "1.5em 1.5em",
+                      paddingRight: "2.5rem",
+                    }}
                     required
                   >
-                    <option value="">Select a category</option>
+                    <option value="" disabled>
+                      -- Select a category --
+                    </option>
                     {MENU_CATEGORIES.map((category) => (
                       <option key={category} value={category}>
                         {category}
@@ -309,39 +318,55 @@ const MenuManagement = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Food Type
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Food Type <span className="text-red-500">*</span>
                 </label>
-                <div className="flex space-x-6">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="isVegetarian"
-                      checked={formData.isVegetarian === true}
-                      onChange={() =>
-                        setFormData({ ...formData, isVegetarian: true })
-                      }
-                      className="w-4 h-4 text-green-600"
-                    />
-                    <span className="text-sm text-gray-700 flex items-center">
-                      <span className="text-green-600 text-xl mr-1">●</span>{" "}
-                      Vegetarian
-                    </span>
+                <div className="flex gap-4">
+                  <label className="flex-1 cursor-pointer">
+                    <div
+                      className={`flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-all ${
+                        formData.isVegetarian === true
+                          ? "border-green-500 bg-green-50"
+                          : "border-gray-300 bg-white hover:border-green-300"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="isVegetarian"
+                        checked={formData.isVegetarian === true}
+                        onChange={() =>
+                          setFormData({ ...formData, isVegetarian: true })
+                        }
+                        className="w-4 h-4 text-green-600 cursor-pointer"
+                      />
+                      <span className="font-medium text-gray-900 flex items-center">
+                        <span className="text-green-600 text-2xl mr-2">●</span>
+                        Vegetarian
+                      </span>
+                    </div>
                   </label>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="radio"
-                      name="isVegetarian"
-                      checked={formData.isVegetarian === false}
-                      onChange={() =>
-                        setFormData({ ...formData, isVegetarian: false })
-                      }
-                      className="w-4 h-4 text-red-600"
-                    />
-                    <span className="text-sm text-gray-700 flex items-center">
-                      <span className="text-red-600 text-xl mr-1">●</span>{" "}
-                      Non-Vegetarian
-                    </span>
+                  <label className="flex-1 cursor-pointer">
+                    <div
+                      className={`flex items-center justify-center space-x-3 p-4 border-2 rounded-lg transition-all ${
+                        formData.isVegetarian === false
+                          ? "border-red-500 bg-red-50"
+                          : "border-gray-300 bg-white hover:border-red-300"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="isVegetarian"
+                        checked={formData.isVegetarian === false}
+                        onChange={() =>
+                          setFormData({ ...formData, isVegetarian: false })
+                        }
+                        className="w-4 h-4 text-red-600 cursor-pointer"
+                      />
+                      <span className="font-medium text-gray-900 flex items-center">
+                        <span className="text-red-600 text-2xl mr-2">●</span>
+                        Non-Vegetarian
+                      </span>
+                    </div>
                   </label>
                 </div>
               </div>
