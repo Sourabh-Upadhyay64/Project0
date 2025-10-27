@@ -72,34 +72,31 @@ export const CheckoutPage = () => {
         splitCount: splitEnabled ? splitCount : undefined,
         promoCode: promoCode || undefined,
         paymentMethod,
+        // Mark UPI orders as pending payment
+        paymentStatus: paymentMethod === "upi" ? "pending" : undefined,
       };
 
       setSplitBill(splitEnabled, splitEnabled ? splitCount : undefined);
-      const order = await placeOrder(orderData);
 
       // Handle different payment methods
       if (paymentMethod === "upi") {
-        // Initiate UPI payment
-        const upiData = await paymentService.initiateUpiPayment(
-          order.id,
-          total
-        );
+        // For UPI: Don't place order yet, just initiate payment
+        // We'll create a temporary order reference
 
-        // Open UPI app
-        paymentService.openUpiApp(upiData.upiLink);
-
-        // Show instructions
-        toast.info("Complete payment in your UPI app", {
-          description: "You'll be redirected after payment",
-          duration: 5000,
+        toast.info("Redirecting to UPI payment...", {
+          description: "Complete payment to place your order",
+          duration: 3000,
         });
 
-        // Navigate to order status page where we'll poll for payment
-        clearCart();
-        navigate(
-          `/customer/order-status?orderId=${order.id}&awaitingPayment=true`
-        );
+        // Store order data temporarily
+        sessionStorage.setItem("pendingOrder", JSON.stringify(orderData));
+
+        // Navigate to UPI payment page
+        navigate("/customer/upi-payment");
       } else if (paymentMethod === "cash") {
+        // Place order immediately for cash payment
+        const order = await placeOrder(orderData);
+
         // Update payment status to pending (will pay at counter)
         await paymentService.updatePaymentStatus(order.id, "cash", "pending");
 
@@ -107,6 +104,9 @@ export const CheckoutPage = () => {
         toast.success("Order placed! Pay at the counter");
         navigate(`/customer/order-status?orderId=${order.id}`);
       } else if (paymentMethod === "card") {
+        // Place order immediately for card payment
+        const order = await placeOrder(orderData);
+
         // Update payment status to pending (will pay at counter)
         await paymentService.updatePaymentStatus(order.id, "card", "pending");
 
