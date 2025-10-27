@@ -72,9 +72,7 @@ export const FoodRating = ({
           >
             <Sparkles className="w-16 h-16 mx-auto text-green-600 mb-4" />
           </motion.div>
-          <h3 className="text-2xl font-bold text-green-800 mb-2">
-            Thank You!
-          </h3>
+          <h3 className="text-2xl font-bold text-green-800 mb-2">Thank You!</h3>
           <p className="text-green-700">
             Your feedback helps us serve you better
           </p>

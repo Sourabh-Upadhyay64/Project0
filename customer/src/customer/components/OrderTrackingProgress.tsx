@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { 
-  CheckCircle2, 
-  Clock, 
-  ChefHat, 
-  BellRing, 
-  Star 
-} from "lucide-react";
+import { CheckCircle2, Clock, ChefHat, BellRing, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface OrderStatus {
@@ -15,7 +9,12 @@ interface OrderStatus {
 }
 
 interface OrderTrackingProgressProps {
-  currentStatus: "pending" | "preparing" | "prepared" | "delivered" | "cancelled";
+  currentStatus:
+    | "pending"
+    | "preparing"
+    | "prepared"
+    | "delivered"
+    | "cancelled";
   orderNumber?: string;
 }
 
@@ -71,7 +70,7 @@ export const OrderTrackingProgress = ({
       setProgress(0);
       return;
     }
-    
+
     const statusIndex = stages.findIndex((stage) => stage.id === currentStatus);
     const progressPercentage = ((statusIndex + 1) / stages.length) * 100;
     setProgress(progressPercentage);
@@ -153,9 +152,7 @@ export const OrderTrackingProgress = ({
                 <motion.div
                   className={cn(
                     "relative z-10 w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition-all duration-300",
-                    isActive || isCompleted
-                      ? stage.activeBg
-                      : stage.bgColor,
+                    isActive || isCompleted ? stage.activeBg : stage.bgColor,
                     isActive && "ring-4 ring-primary/20 scale-110"
                   )}
                   initial={{ scale: 0.8, opacity: 0 }}
@@ -171,9 +168,7 @@ export const OrderTrackingProgress = ({
                   <Icon
                     className={cn(
                       "w-7 h-7 transition-colors duration-300",
-                      isActive || isCompleted
-                        ? stage.activeColor
-                        : stage.color
+                      isActive || isCompleted ? stage.activeColor : stage.color
                     )}
                   />
 
@@ -210,9 +205,7 @@ export const OrderTrackingProgress = ({
                 <motion.p
                   className={cn(
                     "mt-3 text-sm font-medium text-center transition-colors duration-300",
-                    isActive || isCompleted
-                      ? "text-gray-900"
-                      : "text-gray-500"
+                    isActive || isCompleted ? "text-gray-900" : "text-gray-500"
                   )}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -256,10 +249,14 @@ export const OrderTrackingProgress = ({
         transition={{ delay: 0.8 }}
       >
         <p className="text-sm text-gray-600">
-          {currentStatus === "pending" && "Your order has been received and is being processed"}
-          {currentStatus === "preparing" && "Our chef is preparing your delicious meal"}
-          {currentStatus === "prepared" && "Your order is ready! Please collect from the counter"}
-          {currentStatus === "delivered" && "Enjoy your meal! Hope you loved it ✨"}
+          {currentStatus === "pending" &&
+            "Your order has been received and is being processed"}
+          {currentStatus === "preparing" &&
+            "Our chef is preparing your delicious meal"}
+          {currentStatus === "prepared" &&
+            "Your order is ready! Please collect from the counter"}
+          {currentStatus === "delivered" &&
+            "Enjoy your meal! Hope you loved it ✨"}
         </p>
       </motion.div>
     </div>

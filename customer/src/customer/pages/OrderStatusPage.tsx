@@ -19,7 +19,8 @@ export const OrderStatusPage = () => {
 
   // Initialize WebSocket connection for real-time updates
   useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_URL || "https://project0-f2hv.onrender.com";
+    const apiUrl =
+      import.meta.env.VITE_API_URL || "https://project0-f2hv.onrender.com";
     const newSocket = io(apiUrl, {
       transports: ["websocket", "polling"],
     });

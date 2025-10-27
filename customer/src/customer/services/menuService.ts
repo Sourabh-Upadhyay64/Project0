@@ -16,6 +16,8 @@ export interface MenuItem {
   isVegetarian?: boolean;
   isVegan?: boolean;
   spicyLevel?: number;
+  averageRating?: number;
+  totalRatings?: number;
 }
 
 export interface MenuCategory {
@@ -56,6 +58,8 @@ class MenuService {
           inStock: item.available !== false && (item.inventoryCount || 0) > 0,
           available: item.available,
           inventoryCount: item.inventoryCount,
+          averageRating: item.averageRating,
+          totalRatings: item.totalRatings,
         };
 
         categoriesMap.get(category)!.push(mappedItem);

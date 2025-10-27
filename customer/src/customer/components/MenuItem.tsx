@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Plus, Minus, Leaf, Flame } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useCart } from '../context/CartContext';
-import { MenuItem as MenuItemType } from '../services/menuService';
+import { useState } from "react";
+import { Plus, Minus, Leaf, Flame, Star } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useCart } from "../context/CartContext";
+import { MenuItem as MenuItemType } from "../services/menuService";
 import {
   Dialog,
   DialogContent,
@@ -12,11 +12,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
-import { toast } from 'sonner';
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 
 interface MenuItemProps {
   item: MenuItemType;
@@ -25,13 +25,22 @@ interface MenuItemProps {
 export const MenuItem = ({ item }: MenuItemProps) => {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariant, setSelectedVariant] = useState(item.variants?.[0]?.name || '');
-  const [selectedAddOns, setSelectedAddOns] = useState<{ name: string; price: number }[]>([]);
+  const [selectedVariant, setSelectedVariant] = useState(
+    item.variants?.[0]?.name || ""
+  );
+  const [selectedAddOns, setSelectedAddOns] = useState<
+    { name: string; price: number }[]
+  >([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const getPrice = () => {
-    const variantPrice = item.variants?.find((v) => v.name === selectedVariant)?.price || item.price;
-    const addOnsPrice = selectedAddOns.reduce((sum, addOn) => sum + addOn.price, 0);
+    const variantPrice =
+      item.variants?.find((v) => v.name === selectedVariant)?.price ||
+      item.price;
+    const addOnsPrice = selectedAddOns.reduce(
+      (sum, addOn) => sum + addOn.price,
+      0
+    );
     return variantPrice + addOnsPrice;
   };
 
@@ -45,11 +54,11 @@ export const MenuItem = ({ item }: MenuItemProps) => {
       variant: selectedVariant || undefined,
       addOns: selectedAddOns.length > 0 ? selectedAddOns : undefined,
     });
-    
-    toast.success('Added to cart', {
+
+    toast.success("Added to cart", {
       description: `${quantity}x ${item.name}`,
     });
-    
+
     setIsDialogOpen(false);
     setQuantity(1);
     setSelectedAddOns([]);
@@ -63,8 +72,8 @@ export const MenuItem = ({ item }: MenuItemProps) => {
       quantity: 1,
       image: item.image,
     });
-    
-    toast.success('Added to cart');
+
+    toast.success("Added to cart");
   };
 
   const toggleAddOn = (addOn: { name: string; price: number }) => {
@@ -87,7 +96,9 @@ export const MenuItem = ({ item }: MenuItemProps) => {
           />
           {!item.inStock && (
             <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
-              <span className="text-white text-xs font-semibold">Out of Stock</span>
+              <span className="text-white text-xs font-semibold">
+                Out of Stock
+              </span>
             </div>
           )}
         </div>
@@ -95,29 +106,63 @@ export const MenuItem = ({ item }: MenuItemProps) => {
         {/* Item Details */}
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="font-semibold text-base sm:text-lg leading-tight">{item.name}</h3>
+            <h3 className="font-semibold text-base sm:text-lg leading-tight">
+              {item.name}
+            </h3>
             <div className="flex gap-1 flex-shrink-0">
               {item.isVegetarian && (
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                <Badge
+                  variant="outline"
+                  className="bg-green-50 text-green-700 border-green-200"
+                >
                   <Leaf className="w-3 h-3" />
                 </Badge>
               )}
               {item.spicyLevel && item.spicyLevel > 0 && (
-                <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200">
+                <Badge
+                  variant="outline"
+                  className="bg-orange-50 text-orange-700 border-orange-200"
+                >
                   <Flame className="w-3 h-3" />
                 </Badge>
               )}
             </div>
           </div>
 
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{item.description}</p>
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
+            {item.description}
+          </p>
+
+          {/* Rating Display */}
+          {item.averageRating && item.totalRatings > 0 && (
+            <div className="flex items-center gap-1 mb-2">
+              <div className="flex items-center">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`w-3.5 h-3.5 ${
+                      i < Math.round(item.averageRating)
+                        ? "fill-yellow-400 text-yellow-400"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground">
+                {item.averageRating.toFixed(1)} ({item.totalRatings}{" "}
+                {item.totalRatings === 1 ? "rating" : "ratings"})
+              </span>
+            </div>
+          )}
 
           <div className="flex items-center justify-between">
-            <span className="font-bold text-primary text-lg">${item.price.toFixed(2)}</span>
-            
+            <span className="font-bold text-primary text-lg">
+              ${item.price.toFixed(2)}
+            </span>
+
             {item.inStock && (
               <div className="flex gap-2">
-                {(item.variants || item.addOns) ? (
+                {item.variants || item.addOns ? (
                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>
                       <Button size="sm" className="h-9">
@@ -128,20 +173,38 @@ export const MenuItem = ({ item }: MenuItemProps) => {
                     <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
                       <DialogHeader>
                         <DialogTitle>{item.name}</DialogTitle>
-                        <DialogDescription>{item.description}</DialogDescription>
+                        <DialogDescription>
+                          {item.description}
+                        </DialogDescription>
                       </DialogHeader>
 
                       <div className="space-y-6 py-4">
                         {/* Variants */}
                         {item.variants && item.variants.length > 0 && (
                           <div>
-                            <Label className="text-base font-semibold mb-3 block">Choose Size</Label>
-                            <RadioGroup value={selectedVariant} onValueChange={setSelectedVariant}>
+                            <Label className="text-base font-semibold mb-3 block">
+                              Choose Size
+                            </Label>
+                            <RadioGroup
+                              value={selectedVariant}
+                              onValueChange={setSelectedVariant}
+                            >
                               {item.variants.map((variant) => (
-                                <div key={variant.name} className="flex items-center space-x-3 mb-2">
-                                  <RadioGroupItem value={variant.name} id={variant.name} />
-                                  <Label htmlFor={variant.name} className="flex-1 cursor-pointer">
-                                    <span className="font-medium">{variant.name}</span>
+                                <div
+                                  key={variant.name}
+                                  className="flex items-center space-x-3 mb-2"
+                                >
+                                  <RadioGroupItem
+                                    value={variant.name}
+                                    id={variant.name}
+                                  />
+                                  <Label
+                                    htmlFor={variant.name}
+                                    className="flex-1 cursor-pointer"
+                                  >
+                                    <span className="font-medium">
+                                      {variant.name}
+                                    </span>
                                     <span className="ml-auto text-primary font-semibold">
                                       ${variant.price.toFixed(2)}
                                     </span>
@@ -155,16 +218,26 @@ export const MenuItem = ({ item }: MenuItemProps) => {
                         {/* Add-ons */}
                         {item.addOns && item.addOns.length > 0 && (
                           <div>
-                            <Label className="text-base font-semibold mb-3 block">Add-ons (Optional)</Label>
+                            <Label className="text-base font-semibold mb-3 block">
+                              Add-ons (Optional)
+                            </Label>
                             <div className="space-y-2">
                               {item.addOns.map((addOn) => (
-                                <div key={addOn.name} className="flex items-center space-x-3">
+                                <div
+                                  key={addOn.name}
+                                  className="flex items-center space-x-3"
+                                >
                                   <Checkbox
                                     id={addOn.name}
-                                    checked={selectedAddOns.some((a) => a.name === addOn.name)}
+                                    checked={selectedAddOns.some(
+                                      (a) => a.name === addOn.name
+                                    )}
                                     onCheckedChange={() => toggleAddOn(addOn)}
                                   />
-                                  <Label htmlFor={addOn.name} className="flex-1 cursor-pointer">
+                                  <Label
+                                    htmlFor={addOn.name}
+                                    className="flex-1 cursor-pointer"
+                                  >
                                     <span>{addOn.name}</span>
                                     <span className="ml-auto text-primary font-semibold">
                                       +${addOn.price.toFixed(2)}
@@ -178,16 +251,22 @@ export const MenuItem = ({ item }: MenuItemProps) => {
 
                         {/* Quantity */}
                         <div>
-                          <Label className="text-base font-semibold mb-3 block">Quantity</Label>
+                          <Label className="text-base font-semibold mb-3 block">
+                            Quantity
+                          </Label>
                           <div className="flex items-center gap-3">
                             <Button
                               variant="outline"
                               size="icon"
-                              onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                              onClick={() =>
+                                setQuantity(Math.max(1, quantity - 1))
+                              }
                             >
                               <Minus className="w-4 h-4" />
                             </Button>
-                            <span className="text-lg font-semibold w-12 text-center">{quantity}</span>
+                            <span className="text-lg font-semibold w-12 text-center">
+                              {quantity}
+                            </span>
                             <Button
                               variant="outline"
                               size="icon"
@@ -206,7 +285,10 @@ export const MenuItem = ({ item }: MenuItemProps) => {
                               ${(getPrice() * quantity).toFixed(2)}
                             </span>
                           </div>
-                          <Button onClick={handleAddToCart} className="w-full h-12 text-base">
+                          <Button
+                            onClick={handleAddToCart}
+                            className="w-full h-12 text-base"
+                          >
                             Add to Cart
                           </Button>
                         </div>
